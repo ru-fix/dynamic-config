@@ -1,0 +1,32 @@
+<idea-plugin>
+  <id>plugin</id>
+  <name>Dynamic Config</name>
+  <version>1.0</version>
+  <vendor email="kasfandiyarov@gmail.com" url="https://github.com/ru-fix">FIX</vendor>
+
+  <description>
+    <![CDATA[
+      Dynamic Config framework makes it easier to configure application through dynamic type safe properties. <br>
+      Dynamic Config plugin provides code validation and navigation.
+    ]]>
+  </description>
+
+  <change-notes>
+    <![CDATA[
+      1.0 Convert code format from old API to new one.<br>
+    ]]>
+  </change-notes>
+
+  <idea-version since-build="145.0"/>
+
+  <extensions defaultExtensionNs="com.intellij">
+  </extensions>
+
+  <actions>
+    <action id="dynamicConfigAction" class="ru.fix.dynamic.config.plugin.DynamicConfigAction"
+            text="Dynamic Config">
+      <add-to-group group-id="ToolsMenu" anchor="last"/>
+    </action>
+  </actions>
+
+</idea-plugin>
