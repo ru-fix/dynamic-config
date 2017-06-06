@@ -12,9 +12,9 @@ import static org.slf4j.LoggerFactory.getLogger;
 /**
  * Contain property initial value. Automatically register property change listener.
  */
-public class DynamicPropertyHolder<T> {
+public class DynamicProperty<T> {
 
-    private static final Logger log = getLogger(DynamicPropertyHolder.class);
+    private static final Logger log = getLogger(DynamicProperty.class);
     private static final ExecutorService executor = Executors.newCachedThreadPool();
 
     private final DynamicPropertySource propertySource;
@@ -25,11 +25,11 @@ public class DynamicPropertyHolder<T> {
 
     private List<DynamicPropertyChangeListener<T>> listeners = new CopyOnWriteArrayList<>();
 
-    public DynamicPropertyHolder(DynamicPropertySource propertySource, String name, Class<T> type) {
+    public DynamicProperty(DynamicPropertySource propertySource, String name, Class<T> type) {
         this(propertySource, name, type, null);
     }
 
-    public DynamicPropertyHolder(DynamicPropertySource propertySource, String name, Class<T> type, T defaultValue) {
+    public DynamicProperty(DynamicPropertySource propertySource, String name, Class<T> type, T defaultValue) {
         this.propertySource = propertySource;
         this.name = name;
         this.type = type;
@@ -57,7 +57,7 @@ public class DynamicPropertyHolder<T> {
         return currentValue;
     }
 
-    public DynamicPropertyHolder<T> addListener(DynamicPropertyChangeListener<T> listener) {
+    public DynamicProperty<T> addListener(DynamicPropertyChangeListener<T> listener) {
         listeners.add(listener);
         return this;
     }
@@ -65,11 +65,12 @@ public class DynamicPropertyHolder<T> {
 
     @Override
     public String toString() {
-        return "DynamicPropertyHolder{" +
+        return "DynamicProperty{" +
                 "type=" + type +
                 ", name='" + name + '\'' +
                 ", defaultValue=" + defaultValue +
                 ", currentValue=" + currentValue +
                 '}';
     }
+
 }

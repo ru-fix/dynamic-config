@@ -4,10 +4,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeansException;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
-import ru.fix.dynamic.config.api.DynamicPropertyHolder;
+import ru.fix.dynamic.config.api.DynamicProperty;
 import ru.fix.dynamic.config.api.DynamicPropertySource;
 import ru.fix.dynamic.config.api.exception.PropertyNotFoundException;
-import ru.fix.dynamic.config.spring.annotation.DynamicProperty;
+import ru.fix.dynamic.config.spring.annotation.PropertyId;
 
 import java.lang.reflect.ParameterizedType;
 
@@ -27,13 +27,13 @@ public class PropertyAwareBeanPostProcessor extends BaseZkConfigBeanProcessor {
 
             field.setAccessible(true);
 
-            DynamicProperty zkConfigAnnotation = field.getAnnotation(DynamicProperty.class);
+            PropertyId zkConfigAnnotation = field.getAnnotation(PropertyId.class);
             if (zkConfigAnnotation != null) {
 
                 Class<?> fieldType = field.getType();
 
-                if (!fieldType.isAssignableFrom(DynamicPropertyHolder.class)) {
-                    log.warn("Dynamic property annotation is applicable only on fields of DynamicPropertyHolder type, not '{}'," +
+                if (!fieldType.isAssignableFrom(DynamicProperty.class)) {
+                    log.warn("Dynamic property annotation is applicable only on fields of DynamicProperty type, not '{}'," +
                             " bean name - '{}'.", fieldType, beanName);
                     return;
                 }
@@ -53,7 +53,7 @@ public class PropertyAwareBeanPostProcessor extends BaseZkConfigBeanProcessor {
                 ParameterizedType parameterizedType = (ParameterizedType) field.getGenericType();
                 Class propertyClass = (Class) parameterizedType.getActualTypeArguments()[0];
 
-                field.set(bean, new DynamicPropertyHolder<>(getPropertySource(), propertyId, propertyClass));
+                field.set(bean, new DynamicProperty<>(getPropertySource(), propertyId, propertyClass));
             }
 
         });

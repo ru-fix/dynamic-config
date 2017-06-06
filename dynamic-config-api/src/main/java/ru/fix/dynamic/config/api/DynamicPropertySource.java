@@ -13,32 +13,6 @@ public interface DynamicPropertySource {
     boolean hasProperty(String key);
 
     /**
-     * Returns property value for specified key.
-     * <p>
-     * There are no guarantees of accuracy. This is merely the most recent view
-     * of the data.
-     * </p>
-     *
-     * @param key property name
-     * @return property value or {@code null} if there is no such property
-     */
-    String getProperty(String key);
-
-    /**
-     * Returns property value for specified key.
-     * <p>
-     * There are no guarantees of accuracy. This is merely the most recent view
-     * of the data.
-     * </p>
-     *
-     * @param key         property name
-     * @param defaulValue default value for key
-     * @return property value or {@code defaultValue} if there is no such
-     * property
-     */
-    String getProperty(String key, String defaulValue);
-
-    /**
      * Returns property value for specified key in required type. Currently
      * supported only {@link String},{@link Integer},{@link Long},
      * {@link Boolean} types.
@@ -57,29 +31,7 @@ public interface DynamicPropertySource {
      */
     <T> T getProperty(String key, Class<T> type);
 
-    /**
-     * Works as combination of {@link #getProperty(String, Class)} and
-     * {@link #getProperty(String, String)}
-     * <p>
-     * There are no guarantees of accuracy. This is merely the most recent view
-     * of the data.
-     * </p>
-     *
-     * @param key          property name
-     * @param type         property type
-     * @param defaultValue default value
-     * @return property value, converted to the required type or
-     * {@code defaultValue} if there is no such property
-     */
     <T> T getProperty(String key, Class<T> type, T defaultValue);
-
-    /**
-     * Reads up all existing properties
-     *
-     * @return properties with values
-     * @throws Exception
-     */
-    Properties getAllProperties() throws Exception;
 
     /**
      * Updates (if already exists) or inserts property.
@@ -87,9 +39,9 @@ public interface DynamicPropertySource {
      * @param key     key
      * @param propVal value
      * @throws Exception
-     * @see #updateProperty(String, String)
+     * @see #updateProperty(String, Object)
      */
-    void upsertProperty(String key, String propVal) throws Exception;
+    <T> void upsertProperty(String key, T propVal) throws Exception;
 
     /**
      * Set propertyValue if absent (if node isn't present)
@@ -99,7 +51,7 @@ public interface DynamicPropertySource {
      * @param key     key
      * @param propVal value
      */
-    void putIfAbsent(String key, String propVal) throws Exception;
+    <T> void putIfAbsent(String key, T propVal) throws Exception;
 
     /**
      * Updates property value
@@ -107,18 +59,9 @@ public interface DynamicPropertySource {
      * @param key   key name
      * @param value new value
      * @throws Exception
-     * @see #upsertProperty(String, String)
+     * @see #upsertProperty(String, Object)
      */
-    void updateProperty(String key, String value) throws Exception;
-
-    /**
-     * Registers property change listener. Listener will trigger for
-     * add/update/remove actions on specified property.
-     *
-     * @param propertyName property name
-     * @param listener     listener
-     */
-    void addPropertyChangeListener(String propertyName, DynamicPropertyChangeListener<String> listener);
+    <T> void updateProperty(String key, T value) throws Exception;
 
     /**
      * Registers property change listener. Listener will trigger for
@@ -128,17 +71,5 @@ public interface DynamicPropertySource {
      * @param listener     listener
      */
     <T> void addPropertyChangeListener(String propertyName, Class<T> type, DynamicPropertyChangeListener<T> listener);
-
-    /**
-     * Uploads to the ZooKeeper cluster initial properties. Wouldn't update node
-     * value if it already exists.
-     *
-     * @param propertiesPath initial properties
-     * @return actual set of properties
-     * @throws Exception
-     * @deprecated Configs shouldn't be declared into property file
-     */
-    @Deprecated
-    Properties uploadInitialProperties(String propertiesPath) throws Exception;
 
 }

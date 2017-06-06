@@ -22,7 +22,7 @@ public class SimpleZKConfig implements DynamicPropertySource {
 
     private final Properties properties;
 
-    private Map<String, Collection<DynamicPropertyChangeListener<String>>> listeners = new ConcurrentHashMap<>();
+    private Map<String, Collection<DynamicPropertyChangeListener<?>>> listeners = new ConcurrentHashMap<>();
 
     private final DynamicPropertyMarshaller marshaller;
 
@@ -37,23 +37,13 @@ public class SimpleZKConfig implements DynamicPropertySource {
     }
 
     @Override
-    public String getProperty(String key) {
-        return properties.get(key).toString();
-    }
-
-    @Override
-    public String getProperty(String key, String defaulValue) {
-        return properties.get(key) == null ? defaulValue : properties.get(key).toString();
-    }
-
-    @Override
     public <T> T getProperty(String key, Class<T> type) {
         return getProperty(key, type, null);
     }
 
     @Override
     public <T> T getProperty(String key, Class<T> type, T defaultValue) {
-        String value = getProperty(key);
+        String value = properties.get(key).toString();
         if (value == null) {
             return defaultValue;
         }
@@ -61,31 +51,20 @@ public class SimpleZKConfig implements DynamicPropertySource {
     }
 
     @Override
-    public Properties getAllProperties() throws Exception {
-        return properties;
-    }
-
-   @Override
-    public Properties uploadInitialProperties(String propertiesPath) throws Exception {
-        properties.load(getClass().getResourceAsStream(propertiesPath));
-        return properties;
-    }
-
-    @Override
-    public void upsertProperty(String key, String propVal) throws Exception {
+    public <T> void upsertProperty(String key, T propVal) throws Exception {
         properties.put(key, propVal);
         firePropertyChanged(key, propVal);
     }
 
     @Override
-    public void putIfAbsent(String key, String propVal) throws Exception {
+    public <T> void putIfAbsent(String key, T propVal) throws Exception {
         if (!properties.containsKey(key)) {
             properties.put(key, propVal);
         }
     }
 
     @Override
-    public void updateProperty(String key, String value) throws Exception {
+    public <T> void updateProperty(String key, T value) throws Exception {
         properties.put(key, value);
         firePropertyChanged(key, value);
     }
@@ -98,17 +77,16 @@ public class SimpleZKConfig implements DynamicPropertySource {
         });
     }
 
-    @Override
-    public void addPropertyChangeListener(String propertyName, DynamicPropertyChangeListener<String> listener) {
+    private void addPropertyChangeListener(String propertyName, DynamicPropertyChangeListener<String> listener) {
         listeners.computeIfAbsent(propertyName, key -> new CopyOnWriteArrayList<>()).add(listener);
     }
 
-    private void firePropertyChanged(String propName, String value) {
-        Collection<DynamicPropertyChangeListener<String>> zkPropertyChangeListeners = listeners.get(propName);
+    private <T> void firePropertyChanged(String propName, T value) {
+        Collection<DynamicPropertyChangeListener<?>> zkPropertyChangeListeners = listeners.get(propName);
         if (zkPropertyChangeListeners != null) {
             zkPropertyChangeListeners.forEach(listener -> {
                 try {
-                    listener.onPropertyChanged(value);
+                    ((DynamicPropertyChangeListener<T>)listener).onPropertyChanged(value);
                 } catch (Exception e) {
                     logger.error("Failed to update property {}", propName, e);
                 }
