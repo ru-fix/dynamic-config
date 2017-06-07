@@ -5,6 +5,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 import ru.fix.dynamic.config.api.DefaultDynamicProperty;
+import ru.fix.dynamic.config.api.DynamicProperty;
 import ru.fix.dynamic.config.api.DynamicPropertySource;
 import ru.fix.dynamic.config.api.exception.PropertyNotFoundException;
 import ru.fix.dynamic.config.spring.annotation.PropertyId;
@@ -32,7 +33,7 @@ public class PropertyAwareBeanPostProcessor extends BaseZkConfigBeanProcessor {
 
                 Class<?> fieldType = field.getType();
 
-                if (!fieldType.isAssignableFrom(DefaultDynamicProperty.class)) {
+                if (!fieldType.isAssignableFrom(DynamicProperty.class)) {
                     log.warn("Dynamic property annotation is applicable only on fields of DefaultDynamicProperty type, not '{}'," +
                             " bean name - '{}'.", fieldType, beanName);
                     return;
