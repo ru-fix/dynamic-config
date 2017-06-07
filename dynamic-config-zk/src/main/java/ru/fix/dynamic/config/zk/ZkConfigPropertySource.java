@@ -102,28 +102,10 @@ public class ZkConfigPropertySource implements DynamicPropertySource, AutoClosea
     }
 
     @Override
-    public Properties uploadInitialProperties(String defaultPropertiesFileName) throws Exception {
-        Properties currentProperties = getAllProperties();
-
-        Properties initialProperties = new Properties();
-        InputStream input = ZkConfigPropertySource.class.getClassLoader().getResourceAsStream(defaultPropertiesFileName);
-        initialProperties.load(input);
-
-        for (String property : initialProperties.stringPropertyNames()) {
-            if (currentProperties.getProperty(property) == null) {
-                curatorFramework.create().creatingParentsIfNeeded().forPath(configLocation + "/" + property,
-                        initialProperties.getProperty(property).getBytes(StandardCharsets.UTF_8));
-                currentProperties.put(property, initialProperties.getProperty(property));
-            }
-        }
-        return currentProperties;
-    }
-
-    @Override
-    public void upsertProperty(String key, String propVal) throws Exception {
+    public <T> void upsertProperty(String key, T propVal) throws Exception {
         String propPath = getAbsolutePath(key);
         ChildData currentData = treeCache.getCurrentData(propPath);
-        byte[] newData = propVal.getBytes(StandardCharsets.UTF_8);
+        byte[] newData = marshaller.marshall(propVal).getBytes(StandardCharsets.UTF_8);
         if (currentData != null) {
             if (!Arrays.equals(currentData.getData(), newData)) {
                 curatorFramework.setData().forPath(propPath, newData);
@@ -134,13 +116,14 @@ public class ZkConfigPropertySource implements DynamicPropertySource, AutoClosea
     }
 
     @Override
-    public void putIfAbsent(String key, String propVal) throws Exception {
+    public <T> void putIfAbsent(String key, T propVal) throws Exception {
         String propPath = getAbsolutePath(key);
         ChildData currentData = treeCache.getCurrentData(propPath);
         if (currentData == null) {
             curatorFramework.create()
                     .creatingParentsIfNeeded()
-                    .forPath(propPath, propVal.getBytes(StandardCharsets.UTF_8));
+                    .forPath(propPath,
+                            marshaller.marshall(propVal).getBytes(StandardCharsets.UTF_8));
         }
     }
 
@@ -149,13 +132,11 @@ public class ZkConfigPropertySource implements DynamicPropertySource, AutoClosea
         return getProperty(key) != null;
     }
 
-    @Override
-    public String getProperty(String key) {
+    private String getProperty(String key) {
         return getProperty(key, (String) null);
     }
 
-    @Override
-    public String getProperty(String key, String defaulValue) {
+    private String getProperty(String key, String defaulValue) {
         String path = getAbsolutePath(key);
         ChildData currentData = treeCache.getCurrentData(path);
         return (currentData == null) ? defaulValue : new String(currentData.getData(), StandardCharsets.UTF_8);
@@ -175,39 +156,15 @@ public class ZkConfigPropertySource implements DynamicPropertySource, AutoClosea
         return defaultValue;
     }
 
-    /**
-     * Works through curator directly to load latest data
-     */
-    @Override
-    public Properties getAllProperties() throws Exception {
-        Properties allProperties = new Properties();
-        Stat exist = curatorFramework.checkExists().forPath(getAbsolutePath(""));
-        if (exist != null) {
-            List<String> childs = curatorFramework.getChildren().forPath(getAbsolutePath(""));
-            if (!childs.isEmpty()) {
-                CountDownLatch latcher = new CountDownLatch(childs.size());
-                for (String child : childs) {
-                    curatorFramework.getData().watched().inBackground((client, event) -> {
-                        allProperties.put(child, new String(event.getData(), StandardCharsets.UTF_8));
-                        latcher.countDown();
-                    }).forPath(getAbsolutePath(child));
-                }
-                if (!latcher.await(120, TimeUnit.SECONDS)) {
-                    throw new TimeoutException("Failed to extract zk properties data");
-                }
-            }
-        }
-        return allProperties;
-    }
-
-    @Override
-    public void updateProperty(String key, String value) throws Exception {
+   @Override
+    public <T> void updateProperty(String key, T value) throws Exception {
         String path = getAbsolutePath(key);
-        curatorFramework.setData().forPath(path, value.getBytes(StandardCharsets.UTF_8));
+        curatorFramework.setData().forPath(path, marshaller.marshall(value).getBytes(StandardCharsets.UTF_8));
     }
 
     @Override
-    public <T> void addPropertyChangeListener(String propertyName, Class<T> type,
+    public <T> void addPropertyChangeListener(String propertyName,
+                                              Class<T> type,
                                               DynamicPropertyChangeListener<T> typedListener) {
         addPropertyChangeListener(propertyName, value -> {
             T convertedValue = marshaller.unmarshall(value, type);
@@ -215,8 +172,7 @@ public class ZkConfigPropertySource implements DynamicPropertySource, AutoClosea
         });
     }
 
-    @Override
-    public void addPropertyChangeListener(String propertyName, DynamicPropertyChangeListener<String> listener) {
+    private void addPropertyChangeListener(String propertyName, DynamicPropertyChangeListener<String> listener) {
         listeners.computeIfAbsent(getAbsolutePath(propertyName), key -> new CopyOnWriteArrayList<>()).add(listener);
     }
 
