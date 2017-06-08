@@ -9,10 +9,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import ru.dynamic.config.test.SimpleZKConfig;
-import ru.fix.dynamic.config.api.DefaultDynamicProperty;
-import ru.fix.dynamic.config.api.DynamicPropertyMarshaller;
-import ru.fix.dynamic.config.api.DynamicPropertySource;
-import ru.fix.dynamic.config.api.JSonPropertyMarshaller;
+import ru.fix.dynamic.config.api.*;
 import ru.fix.dynamic.config.spring.annotation.PropertyId;
 import ru.fix.dynamic.config.spring.config.DynamicPropertyConfig;
 
@@ -47,13 +44,13 @@ public class PropertyIdTest {
     }
 
     @PropertyId(TestPropertySet.SOME_PROPERTY_KEY)
-    private DefaultDynamicProperty<User> defaultUser;
+    private DynamicProperty<User> defaultUser;
 
     @PropertyId(TestPropertySet.SOME_FIELD_PROPERTY_KEY)
-    private DefaultDynamicProperty<String> defaultCity;
+    private DynamicProperty<String> defaultCity;
 
     @PropertyId(TestPropertySet.SOME_INT_FIELD_PROPERTY_KEY)
-    private DefaultDynamicProperty<Integer> countryCode;
+    private DynamicProperty<Integer> countryCode;
 
     @Test
     public void addDynamicPropertyListener() {

@@ -24,7 +24,7 @@ public class DynamicPropertyConfig {
 
     @Bean
     @ConditionalOnClass({
-            DynamicPropertyMarshaller.class,
+            DynamicPropertySource.class,
             DynamicPropertyMarshaller.class
     })
     public PropertySetAwareBeanProcessor propertySetAwareBeanProcessor(DynamicPropertySource dynamicPropertySource,
