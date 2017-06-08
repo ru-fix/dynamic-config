@@ -5,7 +5,7 @@
   <parent>
     <artifactId>dynamic-config</artifactId>
     <groupId>ru.fix.dynamic-config</groupId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0.1</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
@@ -15,13 +15,13 @@
     <dependency>
       <groupId>ru.fix.dynamic-config</groupId>
       <artifactId>dynamic-config-spring</artifactId>
-      <version>1.0-SNAPSHOT</version>
+      <version>1.0.1</version>
     </dependency>
 
     <dependency>
       <groupId>ru.fix.dynamic-config</groupId>
       <artifactId>dynamic-config-zk</artifactId>
-      <version>1.0-SNAPSHOT</version>
+      <version>1.0.1</version>
     </dependency>
   </dependencies>
 
